@@ -23,7 +23,7 @@ SHELL = /bin/sh
 
 SYSTEM= $(shell gcc -dumpmachine)
 #ice, ctarta, mpi, cfitsio
-LINKERENV= cfitsio, pil, wcs, root
+LINKERENV= cfitsio, pil, wcs, root, agile
 EXE_NAME = AG_expmapgenT6 
 LIB_NAME = 
 VER_FILE_NAME = version.h
@@ -107,6 +107,10 @@ endif
 ifneq (, $(findstring wcs, $(LINKERENV)))
         INCPATH += -I$(AGILE)/include
 	LIBS += -L$(AGILE)/lib -lagilewcs 
+endif
+ifneq (, $(findstring agile, $(LINKERENV)))
+        INCPATH += -I$(AGILE)/include
+	LIBS += -L$(AGILE)/lib -lpacket -lagiletelem -lagilesci
 endif 
 
 #Set addition parameters that depends by operating system
@@ -257,25 +261,17 @@ install: all
 	#test -d $(datadir)/$(CONF_DEST_DIR) || mkdir -p $(datadir)/$(CONF_DEST_DIR)
 	#test -d $(infodir) || mkdir -p $(infodir)	
 
-	# For library installation
-	test -d $(libdir) || mkdir -p $(libdir)
-	test -d $(includedir) || mkdir -p $(includedir)	
-	$(COPY_FILE) $(LIB_DESTDIR)/$(TARGETA) $(libdir)
-	$(COPY_FILE) $(LIB_DESTDIR)/$(TARGET0) $(libdir)
-	$(COPY_FILE) $(LIB_DESTDIR)/$(TARGET1) $(libdir)
-	$(COPY_FILE) $(LIB_DESTDIR)/$(TARGET2) $(libdir)
-	$(COPY_FILE) $(LIB_DESTDIR)/$(TARGETD) $(libdir)
-	$(COPY_FILE) $(INCLUDE) $(includedir)
 	
 	# For exe installation
-	#test -d $(bindir) || mkdir -p $(bindir)	
-	#$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME) $(bindir)
+	test -d $(bindir) || mkdir -p $(bindir)	
+	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME) $(bindir)
 	#copy icon
 	#test -d $(icondir) || mkdir -p $(icondir)
 	#$(COPY_FILE) $(ICON_DIR)/$(ICON_NAME) $(icondir)
 
 	# For conf files installation
-	#$(COPY_FILE) $(CONF_DIR)/* $(datadir)/$(CONF_DEST_DIR)
+	test -d $(datadir) || mkdir -p $(datadir)
+	$(COPY_FILE) $(CONF_DIR)/* $(datadir)/$(CONF_DEST_DIR)
 
 
 #uninstall: delete all the installed files--the copies that the `install' target creates. 
