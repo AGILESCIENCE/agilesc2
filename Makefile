@@ -24,7 +24,8 @@ SHELL = /bin/sh
 SYSTEM= $(shell gcc -dumpmachine)
 #ice, ctarta, mpi, cfitsio
 LINKERENV= cfitsio, pil, wcs, root, agile
-EXE_NAME = AG_expmapgenT6 
+EXE_NAME1 = AG_expmapgenT6 
+EXE_NAME2 = AG_gammaextract
 LIB_NAME = 
 VER_FILE_NAME = version.h
 #the name of the directory where the conf file are copied (into $(datadir))
@@ -207,7 +208,8 @@ lib: staticlib
 	
 exe: makeobjdir $(OBJECTS)
 		test -d $(EXE_DESTDIR) || mkdir -p $(EXE_DESTDIR)
-		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME) $(OBJECTS_DIR)/*.o $(LIBS)
+		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME1) $(OBJECTS_DIR)/AG_expmapgenT6.o $(LIBS)
+		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME2) $(OBJECTS_DIR)/AG_gammaextract.o  $(OBJECTS_DIR)/AGILEExposureT.o $(OBJECTS_DIR)/AGILECountsT.o $(LIBS)
 	
 staticlib: makelibdir makeobjdir $(OBJECTS)	
 		test -d $(LIB_DESTDIR) || mkdir -p $(LIB_DESTDIR)	
@@ -238,7 +240,8 @@ clean:
 	$(DEL_FILE) *~ core *.core
 	$(DEL_FILE) $(LIB_DESTDIR)/*.a
 	$(DEL_FILE) $(LIB_DESTDIR)/*.so*
-	$(DEL_FILE) $(EXE_DESTDIR)/$(EXE_NAME)	
+	$(DEL_FILE) $(EXE_DESTDIR)/$(EXE_NAME1)
+	$(DEL_FILE) $(EXE_DESTDIR)/$(EXE_NAME2)
 	$(DEL_FILE) version
 	$(DEL_FILE) prefix
 	$(DEL_FILE) $(PROJECT).dvi

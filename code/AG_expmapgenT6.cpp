@@ -344,7 +344,7 @@ int main(int argc,char **argv)
 
 	double deltaT = params["timeslot"];
 
-	cout << "AG_expmapgenT......................evaluating the exposure"<< endl;
+	cout << "AG_expmapgenT6......................evaluating the exposure"<< endl;
 
 	double emin = params["emin"];
 	double emax = params["emax"];
