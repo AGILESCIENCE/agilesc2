@@ -45,6 +45,7 @@ public:
 	AGILEExposureT(string archivelog, string sarFile, uint32_t timestep, double emin, double emax, double index);
 	~AGILEExposureT();
 	bool EvalExposure(double tstart, double tstop, GammaExtractParams& params, double* resultingExp);
+	bool prequery(double tstart, double tstop, GammaExtractParams& params);
 
 protected:
 	double Area(double xbin, double ybin, double theta, int projection);

@@ -27,9 +27,31 @@ AGILECountsT::~AGILECountsT() {
 	delete evtfilter;
 }
 
+bool AGILECountsT::prequery(double tstart, double tstop,  GammaExtractParams& params) {
+	double mdim = params["mdim"];
+	double la = params["la"];
+	double ba = params["ba"];
+	
+	evtfilter->setPostfilter1(mdim, la, ba);
+	
+	int phasecode = params["phasecode"];
+	int filtercode =  params["filtercode"];
+	double emin = params["emin"];
+	double emax = params["emax"];
+	double albrad =  params["albrad"];
+	double fovradmin =  params["fovradmin"];
+	double fovradmax =  params["fovradmax"];
+	
+	if(evtfilter->prequery(tstart, tstop, phasecode, filtercode, emin, emax, albrad, fovradmin, fovradmax )) {
+		;		
+	} else 
+		return false;
+	return true;
+}
+
 bool AGILECountsT::EvalCounts(double tstart, double tstop,  GammaExtractParams& params, uint32_t *resultingCts) {
 	
-	evtfilter->reset();
+		
 	
 	double mdim = params["mdim"];
 	double la = params["la"];

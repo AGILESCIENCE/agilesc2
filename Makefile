@@ -36,7 +36,7 @@ ICON_NAME=
 ####### 2) Directories for the installation
 
 # Prefix for each installed program. Only ABSOLUTE PATH
-prefix=/usr/local
+prefix=$(AGILE)
 exec_prefix=$(prefix)
 # The directory to install the binary files in.
 bindir=$(exec_prefix)/bin
@@ -210,7 +210,7 @@ exe: makeobjdir $(OBJECTS)
 		test -d $(EXE_DESTDIR) || mkdir -p $(EXE_DESTDIR)
 		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME1) $(OBJECTS_DIR)/AG_expmapgenT6.o $(LIBS)
 		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME2) $(OBJECTS_DIR)/AG_gammaextract.o  $(OBJECTS_DIR)/AGILEExposureT.o $(OBJECTS_DIR)/AGILECountsT.o $(LIBS)
-	
+		
 staticlib: makelibdir makeobjdir $(OBJECTS)	
 		test -d $(LIB_DESTDIR) || mkdir -p $(LIB_DESTDIR)	
 		$(DEL_FILE) $(LIB_DESTDIR)/$(TARGETA) 	

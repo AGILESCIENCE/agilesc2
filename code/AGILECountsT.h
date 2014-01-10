@@ -26,6 +26,8 @@ public:
 	AGILECountsT(string archiveevt);
 	~AGILECountsT();
 	bool EvalCounts(double tstart, double tstop, GammaExtractParams& params, uint32_t* resultingCts);
+	bool prequery(double tmin, double tmax, GammaExtractParams& params);
+	
 	bool WritePhotonList(string out);
 	
 protected:

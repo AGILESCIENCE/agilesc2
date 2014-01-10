@@ -48,7 +48,7 @@ inline double AGILEExposureT::AG_expmapgen_area(double xbin, double ybin, double
 }
 
 bool AGILEExposureT::EvalExposure(double tstart, double tstop, GammaExtractParams& params, double *resultingExp) {
-	logfilter->reset();
+	//logfilter->reset();
 	int phasecode = params["phasecode"];
 	
 	if(logfilter->query( tstart, tstop, phasecode )) {
@@ -59,7 +59,16 @@ bool AGILEExposureT::EvalExposure(double tstart, double tstop, GammaExtractParam
 	return true;
 }
 
-
+bool AGILEExposureT::prequery(double tstart, double tstop, GammaExtractParams& params) {
+	//logfilter->reset();
+	int phasecode = params["phasecode"];
+	
+	if(logfilter->prequery( tstart, tstop, phasecode )) {
+		;
+	} else 
+		return false;
+	return true;
+}
 
 double AGILEExposureT::Exposure(LOGFilter* filter, GammaExtractParams& params)
 {

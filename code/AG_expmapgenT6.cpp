@@ -303,8 +303,6 @@ static void PrintVector(const VecF& arr)
 }
 
 
-//MODIFICARE QUESTO CODICE IN MODO CHE USI LOGFilter
-//INTRODURRE AGILE come variabile d'ambiente per la ricerca dei configuration file
 int main(int argc,char **argv)
 {
     ExpGenParamsT params;

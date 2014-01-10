@@ -170,7 +170,13 @@ int main(int argc,char **argv)
 	string outfileevents = params.outfile;
 	outfileevents += ".photons";
 	
+	//pre-query here
 	
+	cout << "**** prequery ok " << endl;
+	if(!ctsagile->prequery(tmin, tmax, params))
+		cout << "evt prequery problems " << endl;
+	if(!expagile->prequery(tmin, tmax, params)) 
+		cout << "log prequery problems " << endl;
 	
 	do {
 		timeSlot.Set(beginTime, endTime);
