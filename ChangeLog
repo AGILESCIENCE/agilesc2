@@ -1,3 +1,10 @@
+2014-01-14 Andrea Bulgarelli <bulgarelli@iasfbo.inaf.it>
+TAG v1.1.2
++ changed outfile format of gammaextract (now tstart tend cts exp)
+libagiletelem v1.2.0
+libagilesci v1.0.1
+packetlib v3.1.1
+
 2014-01-10 Andrea Bulgarelli <bulgarelli@iasfbo.inaf.it>
 TAG v1.1.1
 + added prefiltering 
