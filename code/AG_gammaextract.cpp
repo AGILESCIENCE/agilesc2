@@ -172,12 +172,13 @@ int main(int argc,char **argv)
 	
 	//pre-query here
 	
+	/*
 	cout << "**** prequery ok " << endl;
 	if(!ctsagile->prequery(tmin, tmax, params))
 		cout << "evt prequery problems " << endl;
 	if(!expagile->prequery(tmin, tmax, params)) 
 		cout << "log prequery problems " << endl;
-	
+	*/
 	do {
 		timeSlot.Set(beginTime, endTime);
 		Intervals intervalSlots = Intersection(intvs, timeSlot);
@@ -199,12 +200,12 @@ int main(int argc,char **argv)
 						
 					}
 					
-					if(exp != -1 && cts != -1) {
+					if(exp != -1 && cts != -1 ) {
 						expText << setprecision(1);
 						expText << beginTime << " " << endTime << " ";
 						expText << setprecision(2);
-						expText << exp << " ";
-						expText << cts << endl;
+						expText << cts << " ";
+						expText << exp << endl;
 					} else {
 						cerr << "problems in the query " << cts << " " << exp << endl;
 					}	
