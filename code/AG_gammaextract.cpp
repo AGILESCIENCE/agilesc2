@@ -173,11 +173,12 @@ int main(int argc,char **argv)
 	//pre-query here
 	
 	/*
-	cout << "**** prequery ok " << endl;
+	cout << "**** prequery start " << endl;
 	if(!ctsagile->prequery(tmin, tmax, params))
 		cout << "evt prequery problems " << endl;
 	if(!expagile->prequery(tmin, tmax, params)) 
 		cout << "log prequery problems " << endl;
+	cout << "**** prequery ok " << endl;
 	*/
 	do {
 		timeSlot.Set(beginTime, endTime);
@@ -213,8 +214,8 @@ int main(int argc,char **argv)
 						cout << "WARNING: " << beginTime << " " << endTime << " " << endl;	
 			}
 		}
-		else
-			cerr << "No intervals selected" << endl;
+		//else
+		//	cerr << "No intervals selected" << endl;
 		beginTime = endTime;
 		endTime += deltaT;
 		if (tmax<endTime)
