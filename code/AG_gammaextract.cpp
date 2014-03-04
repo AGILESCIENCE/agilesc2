@@ -187,7 +187,7 @@ int main(int argc,char **argv)
 
 			//cout << "Selected intervals" << endl;
 			for (int i=0; i<intervalSlots.Count(); ++i) {
-				//cout << "slot:   " << setprecision(15) << intervalSlots[i].Start() << " " << intervalSlots[i].Stop() << " (" << intervalSlots[i].Stop() - intervalSlots[i].Start() << ") " << endl;
+				cout << "slot:   " << setprecision(15) << intervalSlots[i].Start() << " " << intervalSlots[i].Stop() << " (" << intervalSlots[i].Stop() - intervalSlots[i].Start() << ") " << endl;
 					double exp = -1;
 					
 					if (expagile->EvalExposure(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &exp)) {
