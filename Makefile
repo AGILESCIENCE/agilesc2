@@ -267,7 +267,8 @@ install: all
 	
 	# For exe installation
 	test -d $(bindir) || mkdir -p $(bindir)	
-	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME) $(bindir)
+	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME1) $(bindir)
+	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME2) $(bindir)
 	#copy icon
 	#test -d $(icondir) || mkdir -p $(icondir)
 	#$(COPY_FILE) $(ICON_DIR)/$(ICON_NAME) $(icondir)
