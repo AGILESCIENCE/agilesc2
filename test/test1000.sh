@@ -1,1 +1,0 @@
-./AG_expmapgenT6 test1000 /Users/bulgarelli/devel.agile/data_agiletelem/agilelog.10.poin.raw /Users/bulgarelli/ADC/scientific_analysis/data/AG_GRID_G0017_SFMG_I0023.sar.gz None 1 290.0 0.0 180 90 2.0 360 5 18 ARC 10 1000 2.1 158868000 159472800 100 50000 0 60 /Users/bulgarelli/devel.agile/data_agiletelem/agileevt.phearthL70.thetaG70.poin.raw 5
