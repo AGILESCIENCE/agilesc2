@@ -23,7 +23,7 @@ SHELL = /bin/sh
 
 SYSTEM= $(shell gcc -dumpmachine)
 #ice, ctarta, mpi, cfitsio
-LINKERENV= cfitsio, pil, wcs, root, agile
+LINKERENV= cfitsio pil wcs root agile
 EXE_NAME1 = AG_expmapgenT6 
 EXE_NAME2 = AG_gammaextract
 LIB_NAME = 
@@ -75,7 +75,7 @@ endif
 INCPATH = -I $(INCLUDE_DIR) -I $(AGILE)/include
 LIBS = -lstdc++ -L$(AGILE)/lib -lagilesci
 #Insert the optional parameter to the compiler. The CFLAGS could be changed externally by the user
-CFLAGS   = -g
+CFLAGS   = -g -std=c++11
 #Insert the implicit parameter to the compiler:
 ALL_CFLAGS = -m64 -fexceptions -Wall $(CFLAGS) $(INCPATH)
 #Use CPPFLAGS for the preprocessor
@@ -93,13 +93,8 @@ ifneq (, $(findstring ctarta, $(LINKERENV)))
 	LIBS += -L$(CTARTA)/lib -lpacket -lRTAtelem
 endif
 ifneq (, $(findstring root, $(LINKERENV)))
-        ROOTCFLAGS   := $(shell root-config --cflags)
-	ROOTLIBS     := $(shell root-config --libs)
-	ROOTGLIBS    := $(shell root-config --glibs)
-	ROOTCONF=-O -pipe -Wall -W -fPIC -D_REENTRANT
-	INCPATH += -I$(ROOTSYS)/include/root
-	LIBS += $(ROOTGLIBS) -lMinuit
-	ALL_CFLAGS += $(ROOTCONF)
+    CXXFLAGS += -W -fPIC -D_REENTRANT $(shell root-config --cflags)
+    LIBS += $(shell root-config --glibs) -lMinuit
 endif
 ifneq (, $(findstring pil, $(LINKERENV)))
         INCPATH += -I$(AGILE)/include
@@ -135,6 +130,7 @@ ifneq (, $(findstring apple, $(SYSTEM)))
                 LIBS += -lZerocIce -lZerocIceUtil -lFreeze
         endif
 endif 
+
 
 LINK     = $CC
 #for link
@@ -185,10 +181,10 @@ $(shell  cut $(INCLUDE_DIR)/$(VER_FILE_NAME) -f 3 > version)
 ####### 9) Pattern rules
 
 %.o : %.cpp
-	$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -c $< -o $(OBJECTS_DIR)/$@
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) $(ALL_CFLAGS) -c $< -o $(OBJECTS_DIR)/$@
 
 %.o : %.c
-	$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -c $< -o $(OBJECTS_DIR)/$@
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) $(ALL_CFLAGS) -c $< -o $(OBJECTS_DIR)/$@
 
 #only for documentation generation
 $(DOXY_SOURCE_DIR)/%.h : %.h
