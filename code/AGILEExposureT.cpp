@@ -16,6 +16,10 @@
  
  
 #include "AGILEExposureT.h"
+#include "Selection.h"
+#include "Eval.h"
+
+using namespace eval;
 
 AGILEExposureT::AGILEExposureT(string archivelog, string sarFile, uint32_t timestep, double emin, double emax, double index) {
 	logfilter = new LOGFilter(archivelog, timestep); 
@@ -28,26 +32,25 @@ AGILEExposureT::~AGILEExposureT() {
 	delete logfilter;
 }
 
-double AGILEExposureT::Area(double xbin, double ybin, double theta, int projection)
+double AGILEExposureT::Area(double xbin, double ybin, double theta)
 {
-    if (projection==ARC)
+
         return c_binFactor * xbin * ybin * Sinaa(c_angleFactor * theta);
-    else /// AIT
-        return c_binFactor * xbin * ybin;
+   
 }
 
 double AGILEExposureT::Alikesinaa(double input){
 	if (input == 0) return(1.0); else return(sin(input)/input);
 }
 
-inline double AGILEExposureT::AG_expmapgen_area(double xbin, double ybin, double theta, int projection) {
-    if (projection==ARC)
+inline double AGILEExposureT::AG_expmapgen_area(double xbin, double ybin, double theta) {
+    //if (projection==ARC)
         return 0.0003046174197867085688996857673060958405 * xbin * ybin * Alikesinaa(0.0174532925199432954743716805978692718782 * theta);
-    else
-        return 0.0003046174197867085688996857673060958405 * xbin * ybin; 
+  //  else
+    //    return 0.0003046174197867085688996857673060958405 * xbin * ybin; 
 }
 
-bool AGILEExposureT::EvalExposure(double tstart, double tstop, GammaExtractParams& params, double *resultingExp) {
+bool AGILEExposureT::EvalExposure(double tstart, double tstop, PilParams& params, double *resultingExp) {
 	//logfilter->reset();
 	int phasecode = params["phasecode"];
 	
@@ -59,7 +62,7 @@ bool AGILEExposureT::EvalExposure(double tstart, double tstop, GammaExtractParam
 	return true;
 }
 
-bool AGILEExposureT::prequery(double tstart, double tstop, GammaExtractParams& params) {
+bool AGILEExposureT::prequery(double tstart, double tstop, PilParams& params) {
 	//logfilter->reset();
 	int phasecode = params["phasecode"];
 	
@@ -70,7 +73,7 @@ bool AGILEExposureT::prequery(double tstart, double tstop, GammaExtractParams& p
 	return true;
 }
 
-double AGILEExposureT::Exposure(LOGFilter* filter, GammaExtractParams& params)
+double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
 {
     double lp = 0, bp = 0;
     double learth, bearth;
@@ -92,12 +95,8 @@ double AGILEExposureT::Exposure(LOGFilter* filter, GammaExtractParams& params)
     //1.0 because mres=1 (one bin for each map)
     double mres = 1.0;
         
-    switch (params.projection) {
-    case ARC:
-    	//OLD x = -(params.mdim/2)+(params.mres*(i+0.5));
-    	//where i=0 and mres=1
-    	//=> x = -(mdim/2) + (1 * 0.5)
-    	//x = -mdim;
+   
+    
     	x = -(mdim/2)+(1*(0+0.5));
     	//y = -mdim;
     	y = -(mdim/2)+(1*(0+0.5));
@@ -112,7 +111,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, GammaExtractParams& params)
 
         sphx2s(eul, 1, 1, 0, 0, &phi2, &theta2, &lng, &lat);
 
-        area = AG_expmapgen_area(mres, mres, 90-theta2, params.projection);
+        area = AG_expmapgen_area(mres, mres, 90-theta2);
 
         /*cout << " x: " << x;
 		cout << " y: " << y;
@@ -124,17 +123,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, GammaExtractParams& params)
 		cout << setprecision(15) << " area " << area;
 		cout << endl;
 		*/
-        break;
-    case AIT:
-        prj.r0 = RAD2DEG;
-        prj.phi0 = params["la"];
-        prj.theta0 = params["ba"];
-        aitset(&prj);
-        x = mdim;
-        y = -mdim;
-        aitx2s(&prj, 1, 1, 0, 0, &x, &y, &lng, &lat, &ait);
-        area = AG_expmapgen_area(mres, mres, 0, params.projection);
-    }
+       
 
     long n = 0;
     double time = 0;
@@ -160,8 +149,8 @@ double AGILEExposureT::Exposure(LOGFilter* filter, GammaExtractParams& params)
             cout << "EarthTolTest " << params.EarthTolTest(filter->earth_ra[k-1], filter->earth_dec[k-1], earth_ra0, earth_dec0) << endl;
             */
         	if ((filter->phase[k-1] != filter->phase[k])
-                    || params.YTolTest(filter->ra_y[k-1], filter->dec_y[k-1], ra_y0, dec_y0)
-                    || params.EarthTolTest(filter->earth_ra[k-1], filter->earth_dec[k-1], earth_ra0, earth_dec0)) {
+				|| eval::YTolTest(filter->ra_y[k-1], filter->dec_y[k-1], ra_y0, dec_y0)
+                    || eval::EarthTolTest(filter->earth_ra[k-1], filter->earth_dec[k-1], earth_ra0, earth_dec0)) {
                 //|| params.RollTolTest(&psi[k-1])
                 change[count++] = k;
                 earth_ra0 = filter->earth_ra[k-1];
@@ -226,7 +215,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, GammaExtractParams& params)
                 cout << params.AlbTest(lng, lat, learth, bearth);
                 cout << endl;
                 */
-                if (params.FovTest(theta) && params.AlbTest(lng, lat, learth, bearth))
+				if (eval::FovTest(theta) && eval::AlbTest(lng, lat, learth, bearth))
                     A += 1e-3*time*(raeff->AvgVal(theta, phi))*area;
                 //cout << " raeff.AvgVal(theta, phi) " << raeff.AvgVal(theta, phi) << endl;
                 //cout << " A " << A << endl;

@@ -17,6 +17,18 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <string.h>
+
+//#define DEBUG 1
+
+#include <FitsUtils.h>
+#include <Selection.h>
+#include <Eval.h>
+#include <PilParams.h>
+
+using std::cout;
+using std::endl;
+
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -39,7 +51,45 @@
 #include "AGILEExposureT.h"
 #include "AGILECountsT.h"
 
-#include "GammaExtractParams.h"
+const char* startString = {
+	"################################################################\n"
+	"###                   Task AG_apT v1.0.0 - A.B.              ###"
+};
+
+const char* endString = {
+	"### Task AG_apT exiting .................................... ###\n"
+	"################################################################"
+};
+
+const PilDescription paramsDescr[] = {
+	{ PilString, "outfile", "Output file name" },
+	{ PilString, "logfile", "Grid log index file name" },
+	{ PilString, "evtfile", "Event file index file name" },
+	{ PilString, "sarFileName", "Effective area file name" },
+	{ PilString, "edpFileName", "Energy dispersion file name" },
+	{ PilString, "timelist", "Time intervals file name" },
+	{ PilReal, "mres", "Bin size (degrees)" },
+	{ PilReal, "la", "Longitude of map center (galactic)" },
+	{ PilReal, "ba", "Latitude of map center (galactic)" },
+	{ PilReal, "lonpole", "Rotation of map (degrees)" },
+	{ PilReal, "albrad", "Radius of earth albedo (degrees)" },
+	{ PilReal, "y_tol", "Boresight movement tolerance (degrees)" },
+	{ PilReal, "roll_tol", "Roll tolerance (degrees)" },
+	{ PilReal, "earth_tol", "Earth tolerance (degrees)" },
+	{ PilInt, "phasecode", "Orbital phase code" },
+	{ PilInt, "timestep", "LOG file step size" },
+	{ PilReal, "index", "Spectral index" },
+	{ PilReal, "tmin", "Initial time (sec)" },
+	{ PilReal, "tmax", "Final time (sec)" },
+	{ PilReal, "emin", "Minimum energy" },
+	{ PilReal, "emax", "Maximum energy" },
+	{ PilReal, "fovradmin", "Min radius of field of view (degrees)" },
+	{ PilReal, "fovradmax", "Max radius of field of view (degrees)" },
+	{ PilInt, "filtercode", "Event filter code" },
+	{ PilReal, "timeslot", "Time slot" },
+	{ PilNone, "", "" }
+};
+
 
 using namespace std;
 
@@ -70,32 +120,6 @@ struct timespec startg, stopg;
 	
 
 
-
-class AppScreen
-{
-public:
-    AppScreen()
-    {
-        cout << " "<< endl;
-        cout << " "<< endl;
-        cout << "#################################################################"<< endl;
-        cout << "### GammaExtract V1.0 - 30/12/2013 - A.B., A.T., A.C., T.C. ###"<< endl;
-        cout << "#################################################################"<< endl;
-        cout << "#################################################################"<< endl;
-        cout << endl;
-    }
-
-    ~AppScreen()
-    {
-        cout << endl << endl << endl;
-        cout << "#################################################################"<< endl;
-        cout << "##########  Task GammaExtract.......... exiting ###############"<< endl;
-        cout << "#################################################################"<< endl << endl;
-    }
-};
-
-
-
 static void PrintVector(const VecF& arr)
 {
     cout << "[" << arr.Size() << "] ";
@@ -107,41 +131,34 @@ static void PrintVector(const VecF& arr)
 
 int main(int argc,char **argv)
 {
-
-
-	/*PilParams params(paramsDescr);
+	cout << startString << endl;
+	
+	PilParams params(paramsDescr);
 	if (!params.Load(argc, argv))
 		return EXIT_FAILURE;
-	*/
 	
-    GammaExtractParams params;
-    if (!params.Load(argc, argv))
-        return -1;
+	Intervals intervals;
+	double tmin = params["tmin"];
+	double tmax = params["tmax"];
+	if (!eval::LoadTimeList(params["timelist"], intervals, tmin, tmax)) {
+		cerr << "Error loading timelist file '" << params["timelist"].GetStr() << "'" << endl;
+		return EXIT_FAILURE;
+	}
 	
-    Intervals intvs;
-    double tmin = params["tmin"];
-    double tmax = params["tmax"];
-    const char* intFileName = params["timelist"];
-
-    if (strcmp(intFileName, "None")) {
-        intvs = ReadIntervals(intFileName);
-        tmin = intvs.Min();
-        tmax = intvs.Max();
-        params["tmin"] = tmin;
-        params["tmax"] = tmax;
-    }
-    else {
-        Interval intv(tmin, tmax);
-        intvs.Add(intv);
-    }
-
-    params.Print();
-    if (intvs.Count()>1) {
-        cout << intvs.Count() << " intervals:" << endl;
-        for (int i=0; i<intvs.Count(); ++i)
-            cout << "   " << String(intvs[i]) << endl;
-    }
-
+	cout << endl << "INPUT PARAMETERS:" << endl;
+	params.Print();
+	double mdim = params["mres"];
+	mdim = mdim * sqrt(2);
+	double radius = params["mres"];
+	double binstep = 1.0;
+	const char *projection = "ARC";
+	cout << "radius for evt: " << radius << " - mdim for exp: " << mdim << endl;
+	cout << "Binstep: " << binstep << endl;
+	cout << "Projection: " << projection << endl;
+	
+	cout << "INTERVALS N=" << intervals.Count() << ":" << endl;
+	for (int i=0; i<intervals.Count(); i++)
+		cout << "   " << intervals[i].String() << endl;
 
     
 
@@ -190,37 +207,40 @@ int main(int argc,char **argv)
 	cout << "**** prequery ok " << endl;
 	*/
 	do {
+#ifdef DEBUG
+		cout << "Time slot beginTime: " << beginTime << " endTime: " << endTime << endl;
+#endif
 		timeSlot.Set(beginTime, endTime);
-		Intervals intervalSlots = Intersection(intvs, timeSlot);
+		Intervals intervalSlots = Intersection(intervals, timeSlot);
 		if (intervalSlots.Count()) {
-
-			//cout << "Selected intervals" << endl;
+			cout << "Selected slots:" << endl;
 			for (int i=0; i<intervalSlots.Count(); ++i) {
 				cout << "slot:   " << setprecision(15) << intervalSlots[i].Start() << " " << intervalSlots[i].Stop() << " (" << intervalSlots[i].Stop() - intervalSlots[i].Start() << ") " << endl;
-					double exp = -1;
+				double exp = -1;
+				
+				if (expagile->EvalExposure(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &exp)) {
+					totalExposure += exp;
+				}
+				
+				uint32_t cts = -1;
+				if(ctsagile->EvalCounts(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &cts)) {
+					totalCounts += cts;
+					ctsagile->WritePhotonList(outfileevents);
 					
-					if (expagile->EvalExposure(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &exp)) {
-						totalExposure += exp;
-					}
+				}
+				
+				if(exp != -1 && cts != -1 ) {
+					expText << setprecision(1);
+					expText << beginTime << " " << endTime << " ";
+					expText << setprecision(2);
+					expText << exp << " ";
+					expText << cts << endl;
 					
-					uint32_t cts = -1;
-					if(ctsagile->EvalCounts(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &cts)) {
-						totalCounts += cts;
-						ctsagile->WritePhotonList(outfileevents);
-						
-					}
-					
-					if(exp != -1 && cts != -1 ) {
-						expText << setprecision(1);
-						expText << beginTime << " " << endTime << " ";
-						expText << setprecision(2);
-						expText << cts << " ";
-						expText << exp << endl;
-					} else {
-						cerr << "problems in the query " << cts << " " << exp << endl;
-					}	
-					if(exp == 0 && cts != 0)
-						cout << "WARNING: " << beginTime << " " << endTime << " " << endl;	
+				} else {
+					cerr << "problems in the query " << cts << " " << exp << endl;
+				}	
+				if(exp == 0 && cts != 0)
+					cout << "WARNING: " << beginTime << " " << endTime << " " << endl;	
 			}
 		}
 		//else
@@ -230,6 +250,7 @@ int main(int argc,char **argv)
 		if (tmax<endTime)
 			endTime = tmax;
 	} while (beginTime<tmax);
+	
 	expText.close();
 	
 	cout << "Total Exposure: " << totalExposure << endl;

@@ -20,14 +20,14 @@
 #include "CalibUtils.h"
 #include "GenmapParams.h"
 #include "EVTFilter.h"
-#include "GammaExtractParams.h"
+
 
 class AGILECountsT {
 public:
 	AGILECountsT(string archiveevt);
 	~AGILECountsT();
-	bool EvalCounts(double tstart, double tstop, GammaExtractParams& params, uint32_t* resultingCts);
-	bool prequery(double tmin, double tmax, GammaExtractParams& params);
+	bool EvalCounts(double tstart, double tstop, PilParams& params, uint32_t* resultingCts);
+	bool prequery(double tmin, double tmax, PilParams& params);
 	
 	bool WritePhotonList(string out);
 	

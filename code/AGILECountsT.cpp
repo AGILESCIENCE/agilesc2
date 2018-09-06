@@ -17,6 +17,7 @@
  
 #include "AGILECountsT.h"
 #include <fstream>
+#include <Eval.h>
 
 AGILECountsT::AGILECountsT(string archiveevt) {
 	evtfilter = new EVTFilter(archiveevt); 
@@ -27,7 +28,7 @@ AGILECountsT::~AGILECountsT() {
 	delete evtfilter;
 }
 
-bool AGILECountsT::prequery(double tstart, double tstop,  GammaExtractParams& params) {
+bool AGILECountsT::prequery(double tstart, double tstop,  PilParams& params) {
 	double mdim = params["mdim"];
 	double la = params["la"];
 	double ba = params["ba"];
@@ -49,7 +50,7 @@ bool AGILECountsT::prequery(double tstart, double tstop,  GammaExtractParams& pa
 	return true;
 }
 
-bool AGILECountsT::EvalCounts(double tstart, double tstop,  GammaExtractParams& params, uint32_t *resultingCts) {
+bool AGILECountsT::EvalCounts(double tstart, double tstop, PilParams& params, uint32_t *resultingCts) {
 	
 		
 	
@@ -69,7 +70,8 @@ bool AGILECountsT::EvalCounts(double tstart, double tstop,  GammaExtractParams& 
 	
 	if(evtfilter->query(tstart, tstop, phasecode, filtercode, emin, emax, albrad, fovradmin, fovradmax )) {
 		*resultingCts = evtfilter->time.size(); 
-		//cout << "nrows cts: " << *resultingCts << endl;		
+		//cout << "nrows cts: " << *resultingCts << endl;	
+		//METTI QUI SELEZIONE NEL RAGGIO mdim 
 	} else 
 		return false;
 	return true;

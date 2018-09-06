@@ -37,23 +37,22 @@
 #include "GenmapParams.h"
 
 #include "LOGFilter.h"
-#include "GammaExtractParams.h"
 
 
 class AGILEExposureT {
 public:
 	AGILEExposureT(string archivelog, string sarFile, uint32_t timestep, double emin, double emax, double index);
 	~AGILEExposureT();
-	bool EvalExposure(double tstart, double tstop, GammaExtractParams& params, double* resultingExp);
-	bool prequery(double tstart, double tstop, GammaExtractParams& params);
+	bool EvalExposure(double tstart, double tstop, PilParams& params, double* resultingExp);
+	bool prequery(double tstart, double tstop, PilParams& params);
 
 protected:
-	double Area(double xbin, double ybin, double theta, int projection);
+	double Area(double xbin, double ybin, double theta);
 	double Alikesinaa(double input);
-	inline double AG_expmapgen_area(double xbin, double ybin, double theta, int projection);	
+	inline double AG_expmapgen_area(double xbin, double ybin, double theta);	
 	
 	///return the exposure	
-	double Exposure(LOGFilter* filter,  GammaExtractParams& params);
+	double Exposure(LOGFilter* filter,  PilParams& params);
 	
 	LOGFilter* logfilter;
 	AeffGridAverage* raeff;
