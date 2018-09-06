@@ -193,7 +193,7 @@ int main(int argc,char **argv)
 
 	AGILEExposureT* expagile = new AGILEExposureT(logfile, sarFile, timestep, emin, emax, index);
 	
-	const char *outfile = params["outfile"];
+	string outfileevents = outfile;
 	outfileevents += ".photons";
 	
 	//pre-query here
