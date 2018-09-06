@@ -39,6 +39,8 @@
 #include "AGILEExposureT.h"
 #include "AGILECountsT.h"
 
+#include "GammaExtractParams.h"
+
 using namespace std;
 
 static string String(const Interval& intv)
@@ -64,6 +66,8 @@ static string String(const Intervals& intvs)
 
 struct timespec start, stop;
 struct timespec startg, stopg;
+
+	
 
 
 
@@ -105,6 +109,11 @@ int main(int argc,char **argv)
 {
 
 
+	/*PilParams params(paramsDescr);
+	if (!params.Load(argc, argv))
+		return EXIT_FAILURE;
+	*/
+	
     GammaExtractParams params;
     if (!params.Load(argc, argv))
         return -1;

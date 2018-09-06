@@ -20,6 +20,7 @@
 #include "CalibUtils.h"
 #include "GenmapParams.h"
 #include "EVTFilter.h"
+#include "GammaExtractParams.h"
 
 class AGILECountsT {
 public:

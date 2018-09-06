@@ -37,7 +37,7 @@
 #include "GenmapParams.h"
 
 #include "LOGFilter.h"
-
+#include "GammaExtractParams.h"
 
 
 class AGILEExposureT {

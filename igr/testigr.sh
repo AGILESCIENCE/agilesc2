@@ -1,0 +1,1 @@
+./AG_expmapgenT7 testigr3600_1.5 /Users/bulgarelli/devel.agile/data_agiletelem/agilelog.10.poin.raw /Users/bulgarelli/ADC/scientific_analysis/data/AG_GRID_G0017_SFMG_I0023.sar.gz IGR.ob 1.5 355.447 -0.2689 180 80 0.5 360 5.0 18 ARC 10 3600 2.1 114955265.00001 182692866.000004 100 400 0 60 /Users/bulgarelli/devel.agile/data_agiletelem/agileevt.phearthL70.thetaG70.poin.raw 5 
