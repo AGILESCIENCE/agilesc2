@@ -1,8 +1,8 @@
 /***************************************************************************
                           AGILEExposureT.cpp  -  description
                              -------------------
-    copyright            : (C) 2014 Andrea Bulgarelli, Tomaso Contessi, Andrew Chen
-    email                : bulgarelli@iasfbo.inaf.it
+    copyright            : (C) 2014 Andrea Bulgarelli
+    email                : andrea.bulgarelli@inaf.it
  ***************************************************************************/
 
 /***************************************************************************
@@ -94,35 +94,53 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
     double mdim = params["mdim"];
     //1.0 because mres=1 (one bin for each map)
     double mres = 1.0;
-        
+	
+	Mapspec maps;
+	if (strcmp(maplist, "None")) {
+		maps.Store(maplist);
+		maps.Print();
+	}
+	else {
+		MapspecEntry mapspec;
+		mapspec.fovradmin = params["fovradmin"];
+		mapspec.fovradmax = params["fovradmax"];
+		mapspec.emin = params["emin"];
+		mapspec.emax = params["emax"];
+		mapspec.index = params["index"];
+		maps.push_back(mapspec);
+	}
+	long nmaps = maps.size();
+	
+    long mxdim = long(mdim / mres + 0.1); // dimension (in pixels) of the map    
    
+	long npixels = mxdim * mxdim;
     
-    	x = -(mdim/2)+(1*(0+0.5));
-    	//y = -mdim;
-    	y = -(mdim/2)+(1*(0+0.5));
-        ait = 0;
-        theta2 = 90.0-sqrt(x*x+y*y);
-        phi2 = atan2d(-y, -x);
-        eul[0] = params["la"];
-        eul[1] = 90.0-double(params["ba"]);
-        eul[2] = params["lonpole"];
-        eul[3] = cosd(eul[1]);
-        eul[4] = sind(eul[1]);
+	x = -(mdim/2)+(1*(0+0.5));
+	//y = -mdim;
+	y = -(mdim/2)+(1*(0+0.5));
+	ait = 0;
+	theta2 = 90.0-sqrt(x*x+y*y);
+	phi2 = atan2d(-y, -x);
+	eul[0] = double(params["la"]);
+	eul[1] = 90.0-double(params["ba"]);
+	eul[2] = params["lonpole"];
+	eul[3] = cosd(eul[1]);
+	eul[4] = sind(eul[1]);
 
-        sphx2s(eul, 1, 1, 0, 0, &phi2, &theta2, &lng, &lat);
+	sphx2s(eul, 1, 1, 0, 0, &phi2, &theta2, &lng, &lat);
 
-        area = AG_expmapgen_area(mres, mres, 90-theta2);
+	area = AG_expmapgen_area(mres, mres, 90-theta2);
 
-        /*cout << " x: " << x;
-		cout << " y: " << y;
-		cout << " theta2: " << theta2;
-		cout << " phi2: " << theta2;
-		cout << " lng " << lng;
-		cout << " lat " << lat;
-		for(int kii=0; kii<5; kii++) cout << " eul[" << kii << "] " << eul[kii];
-		cout << setprecision(15) << " area " << area;
-		cout << endl;
-		*/
+	/*cout << " x: " << x;
+	cout << " y: " << y;
+	cout << " theta2: " << theta2;
+	cout << " phi2: " << theta2;
+	cout << " lng " << lng;
+	cout << " lat " << lat;
+	for(int kii=0; kii<5; kii++) cout << " eul[" << kii << "] " << eul[kii];
+	cout << setprecision(15) << " area " << area;
+	cout << endl;
+	*/
        
 
     long n = 0;
@@ -139,7 +157,8 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
 
     //for (long nrows=0; nrows < allnrows; nrows++) {
         long count = 0;
-        double earth_ra0 = filter->earth_ra[0], earth_dec0 = filter->earth_dec[0];
+		double earth_ra0 = filter->earth_ra[0];
+		double earth_dec0 = filter->earth_dec[0];
         double ra_y0 = filter->ra_y[0], dec_y0 = filter->dec_y[0];
         for (long k = 1; k<allnrows; ++k) {
         	/*
