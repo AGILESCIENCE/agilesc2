@@ -43,21 +43,21 @@ class AGILEExposureT {
 public:
 	AGILEExposureT(string archivelog, string sarFile, uint32_t timestep, double emin, double emax, double index);
 	~AGILEExposureT();
-	bool EvalExposure(double tstart, double tstop, PilParams& params, double* resultingExp);
+	bool EvalExposure(double tstart, double tstop, PilParams& params, double* resultingExp, double y_tol, double earth_tol, double albrad);
 	bool prequery(double tstart, double tstop, PilParams& params);
 
 protected:
 	double Area(double xbin, double ybin, double theta);
 	double Alikesinaa(double input);
-	inline double AG_expmapgen_area(double xbin, double ybin, double theta);	
-	
-	///return the exposure	
-	double Exposure(LOGFilter* filter,  PilParams& params);
-	
+	inline double AG_expmapgen_area(double xbin, double ybin, double theta);
+
+	///return the exposure
+	double Exposure(LOGFilter* filter,  PilParams& params, double y_tol, double earth_tol, double albrad);
+
 	LOGFilter* logfilter;
 	AeffGridAverage* raeff;
 	string archivelog;
-	
+
 	const double c_binFactor = 0.0003046174197867085688996857673060958405;
 	const double c_angleFactor = 0.0174532925199432954743716805978692718782;
 };

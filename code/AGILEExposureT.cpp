@@ -13,8 +13,8 @@
  *   For commercial purpose see appropriate license terms                  *
  *                                                                         *
  ***************************************************************************/
- 
- 
+
+
 #include "AGILEExposureT.h"
 #include "Selection.h"
 #include "Eval.h"
@@ -22,7 +22,7 @@
 using namespace eval;
 
 AGILEExposureT::AGILEExposureT(string archivelog, string sarFile, uint32_t timestep, double emin, double emax, double index) {
-	logfilter = new LOGFilter(archivelog, timestep); 
+	logfilter = new LOGFilter(archivelog, timestep);
 	this->archivelog = archivelog;
 	cout << "AeffGridAverage " << emin << " " << emax << " " << index << endl;
 	raeff = new  AeffGridAverage(sarFile.c_str(), emin, emax, index);
@@ -36,7 +36,7 @@ double AGILEExposureT::Area(double xbin, double ybin, double theta)
 {
 
         return c_binFactor * xbin * ybin * Sinaa(c_angleFactor * theta);
-   
+
 }
 
 double AGILEExposureT::Alikesinaa(double input){
@@ -47,17 +47,17 @@ inline double AGILEExposureT::AG_expmapgen_area(double xbin, double ybin, double
     //if (projection==ARC)
         return 0.0003046174197867085688996857673060958405 * xbin * ybin * Alikesinaa(0.0174532925199432954743716805978692718782 * theta);
   //  else
-    //    return 0.0003046174197867085688996857673060958405 * xbin * ybin; 
+    //    return 0.0003046174197867085688996857673060958405 * xbin * ybin;
 }
 
-bool AGILEExposureT::EvalExposure(double tstart, double tstop, PilParams& params, double *resultingExp) {
+bool AGILEExposureT::EvalExposure(double tstart, double tstop, PilParams& params, double *resultingExp, double y_tol, double earth_tol, double albrad) {
 	//logfilter->reset();
 	int phasecode = params["phasecode"];
-	
+
 	if(logfilter->query( tstart, tstop, phasecode )) {
 		//cout << "nrows: " << logfilter->time.size() << endl;
-		*resultingExp = Exposure(logfilter,  params);
-	} else 
+		*resultingExp = Exposure(logfilter, params, y_tol, earth_tol, albrad);
+	} else
 		return false;
 	return true;
 }
@@ -65,15 +65,15 @@ bool AGILEExposureT::EvalExposure(double tstart, double tstop, PilParams& params
 bool AGILEExposureT::prequery(double tstart, double tstop, PilParams& params) {
 	//logfilter->reset();
 	int phasecode = params["phasecode"];
-	
+
 	if(logfilter->prequery( tstart, tstop, phasecode )) {
 		;
-	} else 
+	} else
 		return false;
 	return true;
 }
 
-double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
+double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_tol, double earth_tol, double albrad)
 {
     double lp = 0, bp = 0;
     double learth, bearth;
@@ -94,9 +94,9 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
     double mdim = params["mdim"];
     //1.0 because mres=1 (one bin for each map)
     double mres = 1.0;
-        
-   
-    
+
+
+
     	x = -(mdim/2)+(1*(0+0.5));
     	//y = -mdim;
     	y = -(mdim/2)+(1*(0+0.5));
@@ -123,7 +123,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
 		cout << setprecision(15) << " area " << area;
 		cout << endl;
 		*/
-       
+
 
     long n = 0;
     double time = 0;
@@ -134,7 +134,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
 
 
     double A = 0.0; /// The resulting value
-    
+
     double timestep = params["timestep"];
 
     //for (long nrows=0; nrows < allnrows; nrows++) {
@@ -149,8 +149,8 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
             cout << "EarthTolTest " << params.EarthTolTest(filter->earth_ra[k-1], filter->earth_dec[k-1], earth_ra0, earth_dec0) << endl;
             */
         	if ((filter->phase[k-1] != filter->phase[k])
-				|| eval::YTolTest(filter->ra_y[k-1], filter->dec_y[k-1], ra_y0, dec_y0)
-                    || eval::EarthTolTest(filter->earth_ra[k-1], filter->earth_dec[k-1], earth_ra0, earth_dec0)) {
+				|| eval::YTolTest(filter->ra_y[k-1], filter->dec_y[k-1], ra_y0, dec_y0, y_tol)
+                    || eval::EarthTolTest(filter->earth_ra[k-1], filter->earth_dec[k-1], earth_ra0, earth_dec0, earth_tol)) {
                 //|| params.RollTolTest(&psi[k-1])
                 change[count++] = k;
                 earth_ra0 = filter->earth_ra[k-1];
@@ -169,10 +169,10 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
 				*/
             }
         }
-        
+
         //cout << "----" << endl;
     	//cout << " count " << count << endl;
-    	
+
         if (count == 0)
             change[0] = allnrows;
 
@@ -196,18 +196,18 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
 
             for (n = lowrow; n<highrow; n++)
                 time += filter->livetime[n] * timestep;
-                
+
             //cout << "lowrow " << lowrow << " highrow " << highrow << " time " << time << endl;
 
             Euler(filter->ra_y[lowrow], filter->dec_y[lowrow], &lp, &bp, 1);
             Euler(filter->earth_ra[lowrow], filter->earth_dec[lowrow], &learth, &bearth, 1);
-            
+
             if (ait == 0) {
                 theta = SphDistDeg(lng, lat, lp, bp);
                 phi = 0;
                 /*cout << "theta " << theta << " " << lng << " " << lat << " " << lp << " " << bp << endl;
                 cout << " learth " << learth;
-                cout << " bearth " << bearth; 
+                cout << " bearth " << bearth;
                 cout << " area " << area;
                 cout << " time " << time;
                 cout << endl;
@@ -215,7 +215,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params)
                 cout << params.AlbTest(lng, lat, learth, bearth);
                 cout << endl;
                 */
-				if (eval::FovTest(theta) && eval::AlbTest(lng, lat, learth, bearth))
+				if (eval::FovTest(theta) && eval::AlbTest(lng, lat, learth, bearth, albrad))
                     A += 1e-3*time*(raeff->AvgVal(theta, phi))*area;
                 //cout << " raeff.AvgVal(theta, phi) " << raeff.AvgVal(theta, phi) << endl;
                 //cout << " A " << A << endl;

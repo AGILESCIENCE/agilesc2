@@ -3,7 +3,7 @@
                              -------------------
     copyright            : (C) 2013 AGILE Team
     email                : bulgarelli@iasfbo.inaf.it
-    contributors		 : Andrew Chen, Alberto Pellizzoni, Alessio Trois (IASF-Milano), 
+    contributors		 : Andrew Chen, Alberto Pellizzoni, Alessio Trois (IASF-Milano),
     					   Andrea Bulgarelli (IASF-Bologna), Tomaso Contessi (Nuove Idee sas)
 
  ***************************************************************************/
@@ -117,7 +117,7 @@ static string String(const Intervals& intvs)
 struct timespec start, stop;
 struct timespec startg, stopg;
 
-	
+
 
 
 static void PrintVector(const VecF& arr)
@@ -132,11 +132,11 @@ static void PrintVector(const VecF& arr)
 int main(int argc,char **argv)
 {
 	cout << startString << endl;
-	
+
 	PilParams params(paramsDescr);
 	if (!params.Load(argc, argv))
 		return EXIT_FAILURE;
-	
+
 	Intervals intervals;
 	double tmin = params["tmin"];
 	double tmax = params["tmax"];
@@ -144,7 +144,7 @@ int main(int argc,char **argv)
 		cerr << "Error loading timelist file '" << params["timelist"].GetStr() << "'" << endl;
 		return EXIT_FAILURE;
 	}
-	
+
 	cout << endl << "INPUT PARAMETERS:" << endl;
 	params.Print();
 	double mdim = params["mres"];
@@ -155,12 +155,12 @@ int main(int argc,char **argv)
 	cout << "radius for evt: " << radius << " - mdim for exp: " << mdim << endl;
 	cout << "Binstep: " << binstep << endl;
 	cout << "Projection: " << projection << endl;
-	
+
 	cout << "INTERVALS N=" << intervals.Count() << ":" << endl;
 	for (int i=0; i<intervals.Count(); i++)
 		cout << "   " << intervals[i].String() << endl;
 
-    
+
 
 	cout << "GammaExtract......................evaluating the exposure"<< endl;
 
@@ -174,6 +174,9 @@ int main(int argc,char **argv)
 	const char* evtfile = params["evtfile"];
 	int timestep = params["timestep"];
 	int filtercode = params["filtercode"];
+	double y_tol = params["y_tol"];
+	double earth_tol = params["earth_tol"];
+	double albrad = params["albrad"];
 
 	ofstream expText(outfile);
 	expText.setf(ios::fixed);
@@ -192,17 +195,17 @@ int main(int argc,char **argv)
 	AGILECountsT* ctsagile = new AGILECountsT(evtfile);
 
 	AGILEExposureT* expagile = new AGILEExposureT(logfile, sarFile, timestep, emin, emax, index);
-	
+
 	string outfileevents = outfile;
 	outfileevents += ".photons";
-	
+
 	//pre-query here
-	
+
 	/*
 	cout << "**** prequery start " << endl;
 	if(!ctsagile->prequery(tmin, tmax, params))
 		cout << "evt prequery problems " << endl;
-	if(!expagile->prequery(tmin, tmax, params)) 
+	if(!expagile->prequery(tmin, tmax, params))
 		cout << "log prequery problems " << endl;
 	cout << "**** prequery ok " << endl;
 	*/
@@ -217,30 +220,30 @@ int main(int argc,char **argv)
 			for (int i=0; i<intervalSlots.Count(); ++i) {
 				cout << "slot:   " << setprecision(15) << intervalSlots[i].Start() << " " << intervalSlots[i].Stop() << " (" << intervalSlots[i].Stop() - intervalSlots[i].Start() << ") " << endl;
 				double exp = -1;
-				
-				if (expagile->EvalExposure(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &exp)) {
+
+				if (expagile->EvalExposure(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &exp, y_tol, earth_tol, albrad)) {
 					totalExposure += exp;
 				}
-				
+
 				uint32_t cts = -1;
 				if(ctsagile->EvalCounts(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &cts)) {
 					totalCounts += cts;
 					ctsagile->WritePhotonList(outfileevents);
-					
+
 				}
-				
+
 				if(exp != -1 && cts != -1 ) {
 					expText << setprecision(1);
 					expText << beginTime << " " << endTime << " ";
 					expText << setprecision(2);
 					expText << exp << " ";
 					expText << cts << endl;
-					
+
 				} else {
 					cerr << "problems in the query " << cts << " " << exp << endl;
-				}	
+				}
 				if(exp == 0 && cts != 0)
-					cout << "WARNING: " << beginTime << " " << endTime << " " << endl;	
+					cout << "WARNING: " << beginTime << " " << endTime << " " << endl;
 			}
 		}
 		//else
@@ -250,9 +253,9 @@ int main(int argc,char **argv)
 		if (tmax<endTime)
 			endTime = tmax;
 	} while (beginTime<tmax);
-	
+
 	expText.close();
-	
+
 	cout << "Total Exposure: " << totalExposure << endl;
 	cout << "Total Counts: " << totalCounts << endl;
 
