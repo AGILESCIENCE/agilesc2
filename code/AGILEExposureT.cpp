@@ -50,13 +50,13 @@ inline double AGILEExposureT::AG_expmapgen_area(double xbin, double ybin, double
     //    return 0.0003046174197867085688996857673060958405 * xbin * ybin;
 }
 
-bool AGILEExposureT::EvalExposure(double tstart, double tstop, PilParams& params, double *resultingExp, double y_tol, double earth_tol, double albrad) {
+bool AGILEExposureT::EvalExposure(double tstart, double tstop, PilParams& params, double *resultingExp, double y_tol, double earth_tol, double albrad, int timestep) {
 	//logfilter->reset();
 	int phasecode = params["phasecode"];
 
 	if(logfilter->query( tstart, tstop, phasecode )) {
 		//cout << "nrows: " << logfilter->time.size() << endl;
-		*resultingExp = Exposure(logfilter, params, y_tol, earth_tol, albrad);
+		*resultingExp = Exposure(logfilter, params, y_tol, earth_tol, albrad, timestep);
 	} else
 		return false;
 	return true;
@@ -73,7 +73,7 @@ bool AGILEExposureT::prequery(double tstart, double tstop, PilParams& params) {
 	return true;
 }
 
-double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_tol, double earth_tol, double albrad)
+double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_tol, double earth_tol, double albrad, int timestep)
 {
     double lp = 0, bp = 0;
     double learth, bearth;
@@ -155,8 +155,6 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_t
 
     double A = 0.0; /// The resulting value
 
-    double timestep = params["timestep"];
-
     //for (long nrows=0; nrows < allnrows; nrows++) {
     long count = 0;
 		double earth_ra0 = filter->earth_ra[0];
@@ -237,7 +235,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_t
                 cout << params.AlbTest(lng, lat, learth, bearth);
                 cout << endl;
                 */
-				if (eval::FovTest(maps, k, theta) && eval::AlbTest(lng, lat, learth, bearth, albrad))
+								if (eval::FovTest(maps, k, theta) && eval::AlbTest(lng, lat, learth, bearth, albrad))
                     A += 1e-3*time*(raeff->AvgVal(theta, phi))*area;
                 //cout << " raeff.AvgVal(theta, phi) " << raeff.AvgVal(theta, phi) << endl;
                 //cout << " A " << A << endl;

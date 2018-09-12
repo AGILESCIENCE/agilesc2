@@ -147,6 +147,8 @@ int main(int argc,char **argv)
 
 	cout << endl << "INPUT PARAMETERS:" << endl;
 	params.Print();
+	int timestep = params["timestep"];
+  cout << "timestep as input" << timestep << endl;
 	double mdim = params["mres"];
 	mdim = mdim * sqrt(2);
 	double radius = params["mres"];
@@ -172,7 +174,6 @@ int main(int argc,char **argv)
 	double deltaT = params["timeslot"];
 	const char* logfile = params["logfile"];
 	const char* evtfile = params["evtfile"];
-	int timestep = params["timestep"];
 	int filtercode = params["filtercode"];
 	double y_tol = params["y_tol"];
 	double earth_tol = params["earth_tol"];
@@ -221,7 +222,7 @@ int main(int argc,char **argv)
 				cout << "slot:   " << setprecision(15) << intervalSlots[i].Start() << " " << intervalSlots[i].Stop() << " (" << intervalSlots[i].Stop() - intervalSlots[i].Start() << ") " << endl;
 				double exp = -1;
 
-				if (expagile->EvalExposure(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &exp, y_tol, earth_tol, albrad)) {
+				if (expagile->EvalExposure(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &exp, y_tol, earth_tol, albrad, timestep)) {
 					totalExposure += exp;
 				}
 
