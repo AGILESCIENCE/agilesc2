@@ -24,7 +24,7 @@ SHELL = /bin/sh
 SYSTEM= $(shell gcc -dumpmachine)
 #ice, ctarta, mpi, cfitsio
 LINKERENV= cfitsio pil wcs root agile
-EXE_NAME1 = AG_expmapgenT6
+#EXE_NAME1 = AG_expmapgenT6
 EXE_NAME2 = AG_gammaextract
 LIB_NAME =
 VER_FILE_NAME = version.h
@@ -236,7 +236,7 @@ clean:
 	$(DEL_FILE) *~ core *.core
 	$(DEL_FILE) $(LIB_DESTDIR)/*.a
 	$(DEL_FILE) $(LIB_DESTDIR)/*.so*
-	$(DEL_FILE) $(EXE_DESTDIR)/$(EXE_NAME1)
+	#$(DEL_FILE) $(EXE_DESTDIR)/$(EXE_NAME1)
 	$(DEL_FILE) $(EXE_DESTDIR)/$(EXE_NAME2)
 	$(DEL_FILE) version
 	$(DEL_FILE) prefix
@@ -263,7 +263,7 @@ install: all
 
 	# For exe installation
 	test -d $(bindir) || mkdir -p $(bindir)
-	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME1) $(bindir)
+	#$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME1) $(bindir)
 	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME2) $(bindir)
 	#copy icon
 	#test -d $(icondir) || mkdir -p $(icondir)
