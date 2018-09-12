@@ -24,9 +24,9 @@ SHELL = /bin/sh
 SYSTEM= $(shell gcc -dumpmachine)
 #ice, ctarta, mpi, cfitsio
 LINKERENV= cfitsio pil wcs root agile
-EXE_NAME1 = AG_expmapgenT6 
+EXE_NAME1 = AG_expmapgenT6
 EXE_NAME2 = AG_gammaextract
-LIB_NAME = 
+LIB_NAME =
 VER_FILE_NAME = version.h
 #the name of the directory where the conf file are copied (into $(datadir))
 CONF_DEST_DIR =
@@ -102,12 +102,12 @@ ifneq (, $(findstring pil, $(LINKERENV)))
 endif
 ifneq (, $(findstring wcs, $(LINKERENV)))
         INCPATH += -I$(AGILE)/include
-	LIBS += -L$(AGILE)/lib -lagilewcs 
+	LIBS += -L$(AGILE)/lib -lagilewcs
 endif
 ifneq (, $(findstring agile, $(LINKERENV)))
         INCPATH += -I$(AGILE)/include
-	LIBS += -L$(AGILE)/lib -lpacket -lagiletelem -lagilesci
-endif 
+	LIBS += -L$(AGILE)/lib -lagiletelem -lpacket -lagilesci
+endif
 
 #Set addition parameters that depends by operating system
 
@@ -129,7 +129,7 @@ ifneq (, $(findstring apple, $(SYSTEM)))
 		LIBS += -L$(ICEDIR)/lib
                 LIBS += -lZerocIce -lZerocIceUtil -lFreeze
         endif
-endif 
+endif
 
 
 LINK     = $CC
@@ -154,7 +154,7 @@ VPATH=$(SOURCE_DIR):$(INCLUDE_DIR):
 vpath %.o $(OBJECTS_DIR)
 
 ####### 6) Files of the project
-	
+
 INCLUDE=$(foreach dir,$(INCLUDE_DIR), $(wildcard $(dir)/*.h))
 SOURCE=$(foreach dir,$(SOURCE_DIR), $(wildcard $(dir)/*.cpp))
 SOURCE+=$(foreach dir,$(SOURCE_DIR), $(wildcard $(dir)/*.c))
@@ -192,7 +192,7 @@ $(DOXY_SOURCE_DIR)/%.h : %.h
 
 $(DOXY_SOURCE_DIR)/%.cpp : %.cpp
 	cp  $<  $@
-	
+
 ####### 10) Build rules
 
 #all: compile the entire program.
@@ -200,19 +200,19 @@ all: exe
 		#only if conf directory is present:
 		#$(SYMLINK) $(CONF_DIR) $(CONF_DEST_DIR)
 
-lib: staticlib 
-	
+lib: staticlib
+
 exe: makeobjdir $(OBJECTS)
 		test -d $(EXE_DESTDIR) || mkdir -p $(EXE_DESTDIR)
-		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME1) $(OBJECTS_DIR)/AG_expmapgenT6.o $(LIBS)
+#		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME1) $(OBJECTS_DIR)/AG_expmapgenT6.o $(LIBS)
 		$(CC) $(CPPFLAGS) $(ALL_CFLAGS) -o $(EXE_DESTDIR)/$(EXE_NAME2) $(OBJECTS_DIR)/AG_gammaextract.o  $(OBJECTS_DIR)/AGILEExposureT.o $(OBJECTS_DIR)/AGILECountsT.o $(LIBS)
-		
-staticlib: makelibdir makeobjdir $(OBJECTS)	
-		test -d $(LIB_DESTDIR) || mkdir -p $(LIB_DESTDIR)	
-		$(DEL_FILE) $(LIB_DESTDIR)/$(TARGETA) 	
+
+staticlib: makelibdir makeobjdir $(OBJECTS)
+		test -d $(LIB_DESTDIR) || mkdir -p $(LIB_DESTDIR)
+		$(DEL_FILE) $(LIB_DESTDIR)/$(TARGETA)
 		$(AR) $(LIB_DESTDIR)/$(TARGETA) $(OBJECTS_DIR)/*.o
-	
-dynamiclib: makelibdir makeobjdir $(OBJECTS)	
+
+dynamiclib: makelibdir makeobjdir $(OBJECTS)
 		$(DEL_FILE) $(TARGET) $(TARGET0) $(TARGET1) $(TARGET2)
 		$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS_DIR)/*.o $(LIBS)
 		$(SYMLINK) $(TARGET) $(TARGET0)
@@ -223,14 +223,14 @@ dynamiclib: makelibdir makeobjdir $(OBJECTS)
 		test $(LIB_DESTDIR) = . || $(DEL_FILE) $(LIB_DESTDIR)/$(TARGET1)
 		test $(LIB_DESTDIR) = . || $(DEL_FILE) $(LIB_DESTDIR)/$(TARGET2)
 		test $(LIB_DESTDIR) = . || $(MOVE) $(TARGET) $(TARGET0) $(TARGET1) $(TARGET2) $(LIB_DESTDIR)
-	
+
 makeobjdir:
 	test -d $(OBJECTS_DIR) || mkdir -p $(OBJECTS_DIR)
-	
+
 makelibdir:
 	test -d $(LIB_DESTDIR) || mkdir -p $(LIB_DESTDIR)
 
-#clean: delete all files from the current directory that are normally created by building the program. 
+#clean: delete all files from the current directory that are normally created by building the program.
 clean:
 	$(DEL_FILE) $(OBJECTS_DIR)/*.o
 	$(DEL_FILE) *~ core *.core
@@ -248,21 +248,21 @@ clean:
 	test $(LIB_DESTDIR) = . || $(DEL_DIR) $(LIB_DESTDIR)
 	test $(DOXY_SOURCE_DIR) = . || $(DEL_DIR) $(DOXY_SOURCE_DIR)
 	test $(DOC_DIR) = . || $(DEL_DIR) $(DOC_DIR)
-	
-	
-#Delete all files from the current directory that are created by configuring or building the program. 
+
+
+#Delete all files from the current directory that are created by configuring or building the program.
 distclean: clean
 
-#install: compile the program and copy the executables, libraries, 
-#and so on to the file names where they should reside for actual use. 
+#install: compile the program and copy the executables, libraries,
+#and so on to the file names where they should reside for actual use.
 install: all
 	$(shell echo $(prefix) > prefix)
 	#test -d $(datadir)/$(CONF_DEST_DIR) || mkdir -p $(datadir)/$(CONF_DEST_DIR)
-	#test -d $(infodir) || mkdir -p $(infodir)	
+	#test -d $(infodir) || mkdir -p $(infodir)
 
-	
+
 	# For exe installation
-	test -d $(bindir) || mkdir -p $(bindir)	
+	test -d $(bindir) || mkdir -p $(bindir)
 	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME1) $(bindir)
 	$(COPY_FILE) $(EXE_DESTDIR)/$(EXE_NAME2) $(bindir)
 	#copy icon
@@ -274,28 +274,28 @@ install: all
 	$(COPY_FILE) $(CONF_DIR)/* $(datadir)/$(CONF_DEST_DIR)
 
 
-#uninstall: delete all the installed files--the copies that the `install' target creates. 
+#uninstall: delete all the installed files--the copies that the `install' target creates.
 uninstall:
 	#For library uninstall
-	$(DEL_FILE) $(libdir)/$(TARGETA)	
+	$(DEL_FILE) $(libdir)/$(TARGETA)
 	$(DEL_FILE) $(libdir)/$(TARGETD)
 	$(DEL_FILE) $(libdir)/$(TARGET0)
 	$(DEL_FILE) $(libdir)/$(TARGET1)
 	$(DEL_FILE) $(libdir)/$(TARGET2)
 	$(DEL_FILE) $(addprefix $(includedir)/, $(notdir $(INCLUDE)))
-	
+
 	# For exe uninstall
 	$(DEL_FILE) $(bindir)/$(EXE_NAME)
 	#$(DEL_FILE) $(icondir)/$(ICON_NAME)
-	
+
 #dist: create a distribution tar file for this program
 dist: all
 
-# dvi, pdf, ps, for documentation generation	
+# dvi, pdf, ps, for documentation generation
 dvi: info
 	cd $(DOC_DIR)/latex && $(MAKE)
 	$(SYMLINK) $(DOC_DIR)/latex/refman.dvi $(PROJECT).dvi
-	
+
 pdf: info
 	cd $(DOC_DIR)/latex && $(MAKE) pdf
 	$(SYMLINK) $(DOC_DIR)/latex/refman.pdf $(PROJECT).pdf
@@ -303,11 +303,11 @@ pdf: info
 ps: info
 	cd $(DOC_DIR)/latex && $(MAKE) ps
 	$(SYMLINK) $(DOC_DIR)/latex/refman.ps $(PROJECT).ps
-	
+
 #info: generate any Info files needed.
 info:	makedoxdir $(DOC_INCLUDE) $(DOC_SOURCE)
 	test -d $(DOC_DIR) || mkdir -p $(DOC_DIR)
 	doxygen Doxyfile
-	
+
 makedoxdir:
 	test -d $(DOXY_SOURCE_DIR) || mkdir -p $(DOXY_SOURCE_DIR)
