@@ -137,34 +137,8 @@ int main(int argc,char **argv)
 	if (!params.Load(argc, argv))
 		return EXIT_FAILURE;
 
-	Intervals intervals;
-	double tmin = params["tmin"];
-	double tmax = params["tmax"];
-	if (!eval::LoadTimeList(params["timelist"], intervals, tmin, tmax)) {
-		cerr << "Error loading timelist file '" << params["timelist"].GetStr() << "'" << endl;
-		return EXIT_FAILURE;
-	}
-
 	cout << endl << "INPUT PARAMETERS:" << endl;
 	params.Print();
-	int timestep = params["timestep"];
-  cout << "timestep as input" << timestep << endl;
-	double mdim = params["mres"];
-	mdim = mdim * sqrt(2);
-	double radius = params["mres"];
-	double binstep = 1.0;
-	const char *projection = "ARC";
-	cout << "radius for evt: " << radius << " - mdim for exp: " << mdim << endl;
-	cout << "Binstep: " << binstep << endl;
-	cout << "Projection: " << projection << endl;
-
-	cout << "INTERVALS N=" << intervals.Count() << ":" << endl;
-	for (int i=0; i<intervals.Count(); i++)
-		cout << "   " << intervals[i].String() << endl;
-
-
-
-	cout << "GammaExtract......................evaluating the exposure"<< endl;
 
 	double emin = params["emin"];
 	double emax = params["emax"];
@@ -178,6 +152,55 @@ int main(int argc,char **argv)
 	double y_tol = params["y_tol"];
 	double earth_tol = params["earth_tol"];
 	double albrad = params["albrad"];
+
+	double la = params["la"];
+	double ba = params["ba"];
+	double lonpole = params["lonpole"];
+	double fovradmin = params["fovradmin"];
+	double fovradmax = params["fovradmax"];
+	int phasecode = params["phasecode"];
+
+
+	double tmin = params["tmin"];
+	double tmax = params["tmax"];
+
+	int timestep = params["timestep"];
+
+	double mdim = params["mres"];
+	mdim = mdim * sqrt(2);
+
+	double radius = params["mres"];
+
+	double binstep = 1.0;
+	const char *projection = "ARC";
+	cout << "radius for evt: " << radius << " - mdim for exp: " << mdim << endl;
+	cout << "Binstep: " << binstep << endl;
+	cout << "Projection: " << projection << endl;
+
+	//area calculation
+	double pixel1 = DEG2RAD * DEG2RAD * fabs(mdim * mdim);
+	double areapixel =  pixel1 * Sinaa(DEG2RAD*45.);
+	cout << "### Area pixel " << areapixel << endl;
+
+
+
+
+	Intervals intervals;
+	if (!eval::LoadTimeList(params["timelist"], intervals, tmin, tmax)) {
+		cerr << "Error loading timelist file '" << params["timelist"].GetStr() << "'" << endl;
+		return EXIT_FAILURE;
+	}
+
+
+	cout << "INTERVALS N=" << intervals.Count() << ":" << endl;
+	for (int i=0; i<intervals.Count(); i++)
+		cout << "   " << intervals[i].String() << endl;
+
+
+
+	cout << "GammaExtract......................evaluating the exposure"<< endl;
+
+
 
 	ofstream expText(outfile);
 	expText.setf(ios::fixed);
@@ -219,11 +242,13 @@ int main(int argc,char **argv)
 		if (intervalSlots.Count()) {
 			cout << "Selected slots:" << endl;
 			for (int i=0; i<intervalSlots.Count(); ++i) {
-				cout << "slot:   " << setprecision(15) << intervalSlots[i].Start() << " " << intervalSlots[i].Stop() << " (" << intervalSlots[i].Stop() - intervalSlots[i].Start() << ") " << endl;
+				cout << "slot:   " << setprecision(15) << intervalSlots[i].Start() << " " << intervalSlots[i].Stop() << " (" << intervalSlots[i].Stop() - intervalSlots[i].Start() << ")  count=" << intervalSlots.Count() <<endl;
 				double exp = -1;
 
-				if (expagile->EvalExposure(intervalSlots[i].Start(), intervalSlots[i].Stop(), params, &exp, y_tol, earth_tol, albrad, timestep)) {
+				if (expagile->EvalExposure(intervalSlots[i].Start(), intervalSlots[i].Stop(), &exp, mdim, la, ba, lonpole, fovradmin, fovradmax, emin, emax, index, y_tol, earth_tol, phasecode, albrad, timestep)) {
 					totalExposure += exp;
+					cout << "exp: " << exp << " total exp: "<< totalExposure << endl;
+
 				}
 
 				uint32_t cts = -1;
@@ -232,12 +257,15 @@ int main(int argc,char **argv)
 					ctsagile->WritePhotonList(outfileevents);
 
 				}
+				cout << "totalCounts: " << totalCounts << endl;
+
+
 
 				if(exp != -1 && cts != -1 ) {
 					expText << setprecision(1);
 					expText << beginTime << " " << endTime << " ";
 					expText << setprecision(2);
-					expText << exp << " ";
+					expText << exp/areapixel << " ";
 					expText << cts << endl;
 
 				} else {

@@ -43,8 +43,8 @@ class AGILEExposureT {
 public:
 	AGILEExposureT(string archivelog, string sarFile, uint32_t timestep, double emin, double emax, double index);
 	~AGILEExposureT();
-	bool EvalExposure(double tstart, double tstop, PilParams& params, double* resultingExp, double y_tol, double earth_tol, double albrad, int timestep);
-	bool prequery(double tstart, double tstop, PilParams& params);
+	bool EvalExposure(double tstart, double tstop, double *resultingExp, double mdim, double la, double ba, double lonpole, double fovradmin, double fovradmax, double emin, double emax, double index, double y_tol, double earth_tol, int phasecode, double albrad, int timestep);
+	bool prequery(double tstart, double tstop, int phasecode);
 
 protected:
 	double Area(double xbin, double ybin, double theta);
@@ -52,7 +52,7 @@ protected:
 	inline double AG_expmapgen_area(double xbin, double ybin, double theta);
 
 	///return the exposure
-	double Exposure(LOGFilter* filter,  PilParams& params, double y_tol, double earth_tol, double albrad, int timestep);
+	double Exposure(LOGFilter* filter, double mdim, double la, double ba, double lonpole, double fovradmin, double fovradmax, double emin, double emax, double index, double y_tol, double earth_tol, double albrad, int timestep);
 
 	LOGFilter* logfilter;
 	AeffGridAverage* raeff;

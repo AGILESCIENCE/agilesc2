@@ -50,21 +50,20 @@ inline double AGILEExposureT::AG_expmapgen_area(double xbin, double ybin, double
     //    return 0.0003046174197867085688996857673060958405 * xbin * ybin;
 }
 
-bool AGILEExposureT::EvalExposure(double tstart, double tstop, PilParams& params, double *resultingExp, double y_tol, double earth_tol, double albrad, int timestep) {
+bool AGILEExposureT::EvalExposure(double tstart, double tstop, double *resultingExp, double mdim, double la, double ba, double lonpole, double fovradmin, double fovradmax, double emin, double emax, double index, double y_tol, double earth_tol, int phasecode, double albrad, int timestep) {
 	//logfilter->reset();
-	int phasecode = params["phasecode"];
 
 	if(logfilter->query( tstart, tstop, phasecode )) {
 		//cout << "nrows: " << logfilter->time.size() << endl;
-		*resultingExp = Exposure(logfilter, params, y_tol, earth_tol, albrad, timestep);
+
+		*resultingExp = Exposure(logfilter, mdim, la, ba, lonpole, fovradmin, fovradmax, emin, emax, index, y_tol, earth_tol, albrad, timestep);
 	} else
 		return false;
 	return true;
 }
 
-bool AGILEExposureT::prequery(double tstart, double tstop, PilParams& params) {
+bool AGILEExposureT::prequery(double tstart, double tstop, int phasecode) {
 	//logfilter->reset();
-	int phasecode = params["phasecode"];
 
 	if(logfilter->prequery( tstart, tstop, phasecode )) {
 		;
@@ -73,14 +72,14 @@ bool AGILEExposureT::prequery(double tstart, double tstop, PilParams& params) {
 	return true;
 }
 
-double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_tol, double earth_tol, double albrad, int timestep)
+double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, double ba, double lonpole, double fovradmin, double fovradmax, double emin, double emax, double index, double y_tol, double earth_tol, double albrad, int timestep)
 {
     double lp = 0, bp = 0;
     double learth, bearth;
     double lp0 = 0, bp0 = 0;
     double x = 0, y = 0;
     double theta = 0, phi = 0, phi2 = 0;
-    double eul[5];
+		double eul[5];
 
 
     double theta2;
@@ -91,7 +90,6 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_t
     struct prjprm prj;
     prjini(&prj);
 
-    double mdim = params["mdim"];
     //1.0 because mres=1 (one bin for each map)
     double mres = 1.0;
 
@@ -104,11 +102,11 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_t
 		else {
 		*/
 			MapspecEntry mapspec;
-			mapspec.fovradmin = params["fovradmin"];
-			mapspec.fovradmax = params["fovradmax"];
-			mapspec.emin = params["emin"];
-			mapspec.emax = params["emax"];
-			mapspec.index = params["index"];
+			mapspec.fovradmin = fovradmin;
+			mapspec.fovradmax = fovradmax;
+			mapspec.emin = emin;
+			mapspec.emax = emax;
+			mapspec.index = index;
 			maps.push_back(mapspec);
 		//}
 		long nmaps = maps.size();
@@ -117,22 +115,40 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_t
 
 		long npixels = mxdim * mxdim;
 
+		cout << "mdim: " << mdim << " mres: " << mres << " mxdim: " << mxdim << " nmaps: " << nmaps << " npixels: " << npixels << endl;
+
+
 		x = -(mdim/2)+(1*(0+0.5));
 		//y = -mdim;
 		y = -(mdim/2)+(1*(0+0.5));
 		ait = 0;
 		theta2 = 90.0-sqrt(x*x+y*y);
 		phi2 = atan2d(-y, -x);
-		eul[0] = double(params["la"]);
-		eul[1] = 90.0-double(params["ba"]);
-		eul[2] = params["lonpole"];
+		eul[0] = la;
+		eul[1] = 90.0-ba;
+		eul[2] = lonpole;
 		eul[3] = cosd(eul[1]);
 		eul[4] = sind(eul[1]);
 
 		sphx2s(eul, 1, 1, 0, 0, &phi2, &theta2, &lng, &lat);
 
+
+
+
 		area = AG_expmapgen_area(mres, mres, 90-theta2);
 
+		cout  << "\nx: " << x
+					<< "\ny: " << y
+					<< "\ntheta2: " << theta2
+					<< "\nphi2: " << phi2
+					<< "\neul[0]: " << eul[0]
+					<< "\neul[1]: " << eul[1]
+					<< "\neul[2]: " << eul[2]
+					<< "\neul[3]: " << eul[3]
+					<< "\neul[4]: " << eul[4]
+					<< "\nlng: " << lng
+					<< "\nlat: " << lat
+						<< "\area: " << area << endl;
 		/*cout << " x: " << x;
 		cout << " y: " << y;
 		cout << " theta2: " << theta2;
@@ -217,29 +233,41 @@ double AGILEExposureT::Exposure(LOGFilter* filter, PilParams& params, double y_t
             for (n = lowrow; n<highrow; n++)
                 time += filter->livetime[n] * timestep;
 
-            //cout << "lowrow " << lowrow << " highrow " << highrow << " time " << time << endl;
+            //cout << "timestep " <<  timestep << " lowrow " << lowrow << " highrow " << highrow << " time " << time << endl;
 
             Euler(filter->ra_y[lowrow], filter->dec_y[lowrow], &lp, &bp, 1);
             Euler(filter->earth_ra[lowrow], filter->earth_dec[lowrow], &learth, &bearth, 1);
 
-            if (ait == 0) {
-                theta = SphDistDeg(lng, lat, lp, bp);
-                phi = 0;
-                /*cout << "theta " << theta << " " << lng << " " << lat << " " << lp << " " << bp << endl;
-                cout << " learth " << learth;
-                cout << " bearth " << bearth;
-                cout << " area " << area;
-                cout << " time " << time;
-                cout << endl;
-                cout << params.FovTest(theta) << " ";
-                cout << params.AlbTest(lng, lat, learth, bearth);
-                cout << endl;
-                */
-								if (eval::FovTest(maps, k, theta) && eval::AlbTest(lng, lat, learth, bearth, albrad))
-                    A += 1e-3*time*(raeff->AvgVal(theta, phi))*area;
-                //cout << " raeff.AvgVal(theta, phi) " << raeff.AvgVal(theta, phi) << endl;
-                //cout << " A " << A << endl;
-            }
+
+            theta = SphDistDeg(lng, lat, lp, bp);
+            phi = 0;
+
+						cout << "theta " << theta << " " << lng << " " << lat << " " << lp << " " << bp << endl;
+            cout << " learth " << learth;
+            cout << " bearth " << bearth;
+            cout << " area " << area;
+            cout << " time " << time;
+            cout << endl;
+            cout << FovTest(maps, k, theta) << " ";
+            cout << AlbTest(lng, lat, learth, bearth, albrad);
+            cout << endl;
+						getchar();
+						/*
+						slot:   191808000 191808600 (600)  count=1
+						theta 131.51008536363 356.361370691395 -1.1830405283213 129.972652647034 -14.4188760208757
+						learth 51.532865950073
+						bearth -27.3147087434519
+						area 0.000304591569076555
+						time 1961.29501342773
+						FovTest 0
+						AlbTest 0
+						*/
+
+						if (eval::FovTest(maps, k, theta) && eval::AlbTest(lng, lat, learth, bearth, albrad))
+                A += 1e-3*time*(raeff->AvgVal(theta, phi))*area;
+            //cout << " raeff.AvgVal(theta, phi) " << raeff.AvgVal(theta, phi) << endl;
+            //cout << " A " << A << endl;
+
         }
     //}
 
