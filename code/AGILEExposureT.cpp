@@ -177,6 +177,8 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
 		double earth_dec0 = filter->earth_dec[0];
     double ra_y0 = filter->ra_y[0], dec_y0 = filter->dec_y[0];
 
+		cout << "earth_ra0 " << earth_ra0 << " earth_dec0 " << earth_dec0 << " ra_y0 " << " dec_y0 " << dec_y0 << endl;
+
 		for (long k = 1; k<allnrows; ++k) {
         	/*
         	cout << "0\t" << k-1 << "\t" << filter->phase[k-1] << "\t" << filter->ra_y[k-1] << "\t" << filter->dec_y[k-1] << "\t" << filter->earth_ra[k-1] << "\t" << filter->earth_dec[k-1] << endl;
@@ -193,16 +195,16 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
                 earth_dec0 = filter->earth_dec[k-1];
                 ra_y0 = filter->ra_y[k-1];
                 dec_y0 = filter->dec_y[k-1];
-                /*
-                cout << "----" << endl;
-				cout << " count " << count;
-				cout << " change[count] " << change[count];
-				cout << " earth_ra0 " << earth_ra0;
-				cout << " earth_dec0 " << earth_dec0;
-				cout << " ra_y0 " << ra_y0;
-				cout << " dec_y0 " << dec_y0;
-				cout << endl;
-				*/
+
+								cout << "----" << endl;
+								cout << " count " << count;
+								cout << " change[count] " << change[count];
+								cout << " earth_ra0 " << earth_ra0;
+								cout << " earth_dec0 " << earth_dec0;
+								cout << " ra_y0 " << ra_y0;
+								cout << " dec_y0 " << dec_y0;
+								cout << endl;
+
             }
         }
 
@@ -233,7 +235,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
             for (n = lowrow; n<highrow; n++)
                 time += filter->livetime[n] * timestep;
 
-            //cout << "timestep " <<  timestep << " lowrow " << lowrow << " highrow " << highrow << " time " << time << endl;
+          	cout << "timestep " <<  timestep << " lowrow " << lowrow << " highrow " << highrow << " time " << time << endl;
 
             Euler(filter->ra_y[lowrow], filter->dec_y[lowrow], &lp, &bp, 1);
             Euler(filter->earth_ra[lowrow], filter->earth_dec[lowrow], &learth, &bearth, 1);
