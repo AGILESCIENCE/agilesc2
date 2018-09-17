@@ -91,7 +91,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
     prjini(&prj);
 
     //1.0 because mres=1 (one bin for each map)
-    double mres = 1.0;
+    double mres = mdim;
 
 
 		Mapspec maps;
@@ -118,9 +118,9 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
 		cout << "mdim: " << mdim << " mres: " << mres << " mxdim: " << mxdim << " nmaps: " << nmaps << " npixels: " << npixels << endl;
 
 
-		x = -(mdim/2)+(1*(0+0.5));
+		x = -(mdim/2)+(mres*(0+0.5));
 		//y = -mdim;
-		y = -(mdim/2)+(1*(0+0.5));
+		y = -(mdim/2)+(mres*(0+0.5));
 		ait = 0;
 		theta2 = 90.0-sqrt(x*x+y*y);
 		phi2 = atan2d(-y, -x);
@@ -148,7 +148,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
 					<< "\neul[4]: " << eul[4]
 					<< "\nlng: " << lng
 					<< "\nlat: " << lat
-						<< "\area: " << area << endl;
+						<< "\aarea: " << area << endl;
 		/*cout << " x: " << x;
 		cout << " y: " << y;
 		cout << " theta2: " << theta2;
@@ -251,7 +251,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
             cout << FovTest(maps, k, theta) << " ";
             cout << AlbTest(lng, lat, learth, bearth, albrad);
             cout << endl;
-						getchar();
+	//					getchar();
 						/*
 						slot:   191808000 191808600 (600)  count=1
 						theta 131.51008536363 356.361370691395 -1.1830405283213 129.972652647034 -14.4188760208757

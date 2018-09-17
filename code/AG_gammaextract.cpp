@@ -166,7 +166,10 @@ int main(int argc,char **argv)
 
 	int timestep = params["timestep"];
 
+	//1.0 because mres=1 (one bin for each map)
 	double mdim = params["mres"];
+	cout << " mdim: " << mdim << endl;
+
 	mdim = mdim * sqrt(2);
 
 	double radius = params["mres"];
