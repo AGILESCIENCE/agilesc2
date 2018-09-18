@@ -177,7 +177,8 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
 		double earth_dec0 = filter->earth_dec[0];
     double ra_y0 = filter->ra_y[0], dec_y0 = filter->dec_y[0];
 
-		cout << "earth_ra0 " << earth_ra0 << " earth_dec0 " << earth_dec0 << " ra_y0 " << " dec_y0 " << dec_y0 << endl;
+		cout << "earth_ra0 " << earth_ra0 << " earth_dec0 " << earth_dec0 << " ra_y0 " <<ra_y0 << " dec_y0 " << dec_y0 << endl;
+		cout << "time.size (allnrows): " << allnrows << endl;
 
 		for (long k = 1; k<allnrows; ++k) {
         	/*
@@ -186,11 +187,23 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
             //cout << params.RollTolTest(&psi[k-1]) << endl;
             cout << "EarthTolTest " << params.EarthTolTest(filter->earth_ra[k-1], filter->earth_dec[k-1], earth_ra0, earth_dec0) << endl;
             */
+				cout << "filter->phase[k-1]" << filter->phase[k-1] << " filter->phase[k]" << filter->phase[k] << endl;
+				cout << filter->ra_y[k-1] << " <-ra_y[k-1] "<< filter->dec_y[k-1] << " <-dec_y[k-1] "<< ra_y0 << " <-ra_y0 "<< dec_y0 << " <-dec_y0 "<< y_tol << " <-y_tol" << endl;
+				cout << filter->earth_ra[k-1] << " <-earth_ra[k-1] "<<  filter->earth_dec[k-1] << " <-earth_dec[k-1] "<<  earth_ra0 << " <-earth_ra0 "<<  earth_dec0 << " <-earth_dec0 "<<  earth_tol << " <-earth_tol"<< endl;
+
+				cout << "filter->phase[k-1] != filter->phase[k]: " << (filter->phase[k-1] != filter->phase[k]) << endl;
+				cout << "YTolTest: " << eval::YTolTest(filter->ra_y[k-1], filter->dec_y[k-1], ra_y0, dec_y0, y_tol) << endl;
+				cout << "EarthTolTest: " << eval::EarthTolTest(filter->earth_ra[k-1], filter->earth_dec[k-1], earth_ra0, earth_dec0, earth_tol) << endl;
+				cout << "K: " << k << endl;
+				//getchar();
+
+
   			if ((filter->phase[k-1] != filter->phase[k])
 								|| eval::YTolTest(filter->ra_y[k-1], filter->dec_y[k-1], ra_y0, dec_y0, y_tol)
           			|| eval::EarthTolTest(filter->earth_ra[k-1], filter->earth_dec[k-1], earth_ra0, earth_dec0, earth_tol)) {
                 //|| params.RollTolTest(&psi[k-1])
-                change[count++] = k;
+								cout << "K: " << k << endl;
+				        change[count++] = k;
                 earth_ra0 = filter->earth_ra[k-1];
                 earth_dec0 = filter->earth_dec[k-1];
                 ra_y0 = filter->ra_y[k-1];
@@ -204,6 +217,7 @@ double AGILEExposureT::Exposure(LOGFilter* filter, double mdim, double la, doubl
 								cout << " ra_y0 " << ra_y0;
 								cout << " dec_y0 " << dec_y0;
 								cout << endl;
+								//getchar();
 
             }
         }
